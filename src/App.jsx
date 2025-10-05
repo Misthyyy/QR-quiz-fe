@@ -64,22 +64,12 @@ export default function App() {
   async function finish(score) {
     const totalScore = checkedIn ? preCorrect + score : score;
 
-    console.log(
-      "📊 Raw score:",
-      score,
-      "| Pre-correct:",
-      preCorrect,
-      "| Total:",
-      totalScore
-    );
-
     let reward = "NO_GIFT";
     if (checkedIn) {
       reward = score === 1 ? "GIFT_LARGE" : "GIFT_SMALL";
     }
 
     const r = await api.finish(deviceId, totalScore, reward);
-    console.log("📦 Result returned from API:", r);
 
     setResult(r);
     localStorage.setItem("played", "true");
