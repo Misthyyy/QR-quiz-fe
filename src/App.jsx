@@ -4,6 +4,7 @@ import Quiz from "./components/Quiz";
 import Result from "./components/Result";
 import { api } from "./api";
 import "./styles.css";
+import "./cosmic-theme.css";
 
 function getOrCreateDeviceId() {
   let id = localStorage.getItem("deviceId");

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import ProgressBar from "./ProgressBar";
 import AnswerOption from "./AnswerOption";
+import "../cosmic-theme.css"; // đảm bảo có cosmic-bg, cosmic-star, cosmic-btn, glass
 
 export default function Quiz({ quiz, endTimeISO, onFinish }) {
   const [idx, setIdx] = useState(0);
@@ -10,16 +11,11 @@ export default function Quiz({ quiz, endTimeISO, onFinish }) {
   const [lock, setLock] = useState(false);
   const finished = useRef(false);
 
-  // 🧩 Chuẩn hoá dữ liệu quiz: loại bỏ ký tự A/B/C/D cuối và gán correct
   const parsedQuiz = quiz.map((q) => {
     const last = q.options[q.options.length - 1];
     if (/^[A-D]$/i.test(last)) {
       const correct = last.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
-      return {
-        ...q,
-        options: q.options.slice(0, -1), // bỏ phần tử cuối (chữ cái)
-        correct,
-      };
+      return { ...q, options: q.options.slice(0, -1), correct };
     }
     return q;
   });
@@ -60,7 +56,6 @@ export default function Quiz({ quiz, endTimeISO, onFinish }) {
     };
   }, []);
 
-  // Anti-cheat: change question on tab hide
   useEffect(() => {
     const handler = () => {
       if (document.hidden && idx < parsedQuiz.length && !lock) {
@@ -82,12 +77,6 @@ export default function Quiz({ quiz, endTimeISO, onFinish }) {
     if (lock) return;
     setLock(true);
     const correct = parsedQuiz[idx].correct;
-    console.log(
-      `🧠 Question ${idx + 1}: user chose index ${i} ("${
-        parsedQuiz[idx].options[i]
-      }")`,
-      `| Correct index: ${correct} ("${parsedQuiz[idx].options[correct]}")`
-    );
     const ok = i === correct;
     setStates((s) =>
       s.map((_, k) =>
@@ -104,8 +93,7 @@ export default function Quiz({ quiz, endTimeISO, onFinish }) {
         setStates(Array(parsedQuiz[idx + 1].options.length).fill(""));
         setLock(false);
       } else {
-        const finalScore = ok ? score + 1 : score; // ✅ cộng thêm nếu câu cuối đúng
-        handleFinish(finalScore);
+        handleFinish(ok ? score + 1 : score);
       }
     }, 3000);
   };
@@ -113,35 +101,54 @@ export default function Quiz({ quiz, endTimeISO, onFinish }) {
   const handleFinish = (finalScore = score) => {
     if (finished.current) return;
     finished.current = true;
-    onFinish(finalScore); // ✅ đảm bảo truyền giá trị đúng nhất
+    onFinish(finalScore);
   };
 
   if (idx >= parsedQuiz.length) return null;
   const q = parsedQuiz[idx];
 
-  if (q) {
-    console.log(
-      `👉 Question ${idx + 1}:`,
-      q.q,
-      "\nOptions:",
-      q.options,
-      "\nCorrect index:",
-      q.correct,
-      "\nCorrect answer:",
-      q.options[q.correct]
-    );
-  }
-
   return (
-    <div className="container">
-      <div className="timer">⏱️ {leftSec}s</div>
-      <div className="card">
+    <div>
+      {/* 🌠 Nền vũ trụ */}
+      <div className="cosmic-bg">
+        {[...Array(80)].map((_, i) => (
+          <div
+            key={i}
+            className="cosmic-star"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 2}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="cosmic-card center glass">
+        <div
+          className="timer"
+          style={{ fontFamily: "Goldman", fontSize: "1.25rem" }}
+        >
+          ⏱️ {leftSec}s
+        </div>
+
         <ProgressBar passed={score} />
-        <h2>
+
+        <h2 style={{ fontFamily: "Goldman", margin: "12px 0" }}>
           Câu {idx + 1}/{parsedQuiz.length}
         </h2>
-        <p style={{ opacity: 0.85 }}>{q.q}</p>
-        <div className="answers">
+
+        <p
+          style={{
+            opacity: 0.85,
+            fontFamily: "Goldman",
+            marginBottom: "16px",
+          }}
+        >
+          {q.q}
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {q.options.map((t, i) => (
             <AnswerOption
               key={i}
