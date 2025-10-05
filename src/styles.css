@@ -1,0 +1,17 @@
+:root { font-family: system-ui, Arial, sans-serif; }
+body { margin: 0; background: #0f172a; color: #e2e8f0; }
+.container { max-width: 720px; margin: 0 auto; padding: 24px; }
+.card { background: #111827; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.btn { padding: 12px 16px; border-radius: 12px; border: none; font-weight: 600; }
+.btn-primary { background: #22c55e; color: #0b1020; }
+.btn[disabled] { opacity: .6; }
+.timer { position: fixed; right: 16px; top: 16px; background: #1f2937; padding: 8px 12px; border-radius: 12px; }
+.progress { display: flex; gap: 8px; margin: 16px 0 8px; justify-content: center; }
+.dot { width: 14px; height: 14px; border-radius: 999px; background: #374151; border: 2px solid #64748b; }
+.dot.done { background: #22c55e; border-color: #22c55e; }
+.answers { display: grid; gap: 12px; margin-top: 16px; }
+.answer { padding: 14px; border-radius: 12px; background: #0b1220; border: 2px solid #1f2a40; text-align: left; }
+.answer.correct { border-color: #22c55e; background: #08210f; }
+.answer.wrong { border-color: #ef4444; background: #2a0b10; }
+.center { text-align: center; }
+.reward-img { width: 200px; height: 200px; object-fit: contain; display: block; margin: 0 auto 16px; }
