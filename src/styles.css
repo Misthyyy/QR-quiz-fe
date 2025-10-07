@@ -1,17 +1,78 @@
-:root { font-family: system-ui, Arial, sans-serif; }
-body { margin: 0; background: #0f172a; color: #e2e8f0; }
-.container { max-width: 720px; margin: 0 auto; padding: 24px; }
-.card { background: #111827; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-.btn { padding: 12px 16px; border-radius: 12px; border: none; font-weight: 600; }
-.btn-primary { background: #22c55e; color: #0b1020; }
-.btn[disabled] { opacity: .6; }
-.timer { position: fixed; right: 16px; top: 16px; background: #1f2937; padding: 8px 12px; border-radius: 12px; }
-.progress { display: flex; gap: 8px; margin: 16px 0 8px; justify-content: center; }
-.dot { width: 14px; height: 14px; border-radius: 999px; background: #374151; border: 2px solid #64748b; }
-.dot.done { background: #22c55e; border-color: #22c55e; }
-.answers { display: grid; gap: 12px; margin-top: 16px; }
-.answer { padding: 14px; border-radius: 12px; background: #0b1220; border: 2px solid #1f2a40; text-align: left; }
-.answer.correct { border-color: #22c55e; background: #08210f; }
-.answer.wrong { border-color: #ef4444; background: #2a0b10; }
-.center { text-align: center; }
-.reward-img { width: 200px; height: 200px; object-fit: contain; display: block; margin: 0 auto 16px; }
+:root {
+  font-family: system-ui, Arial, sans-serif;
+}
+
+/* === Tổng thể === */
+body {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background: #000; /* fallback nếu ảnh lỗi */
+}
+
+/* === Ảnh nền mờ === */
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../media/z7086084065802_ce23a6412165c2db37dd1881e349e064.jpg")
+    top center / cover no-repeat; /* thay center bằng top center */
+  opacity: 0.25; /* độ mờ ảnh nền */
+  z-index: 0;
+  filter: blur(2px); /* làm mượt nhẹ */
+  background-position: 10%; /* điều chỉnh vị trí ảnh nền */
+}
+
+/* === Hiệu ứng sao nhẹ === */
+body::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(2px 2px at 20% 30%, white, transparent 40%),
+    radial-gradient(1.5px 1.5px at 80% 60%, white, transparent 40%),
+    radial-gradient(1px 1px at 40% 80%, white, transparent 40%),
+    radial-gradient(1px 1px at 70% 20%, white, transparent 40%);
+  background-size: cover;
+  opacity: 0.3;
+  animation: twinkle 6s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+@keyframes twinkle {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.45;
+  }
+}
+
+/* === Nội dung chính === */
+.main-wrapper {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card {
+  background: rgba(17, 24, 39, 0.9);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* ... Giữ nguyên phần .btn, .answer, .progress, .dot ... */

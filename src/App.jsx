@@ -21,10 +21,12 @@ export default function App() {
   const [endTime, setEndTime] = useState(null);
   const [result, setResult] = useState(null);
   const deviceId = useMemo(() => getOrCreateDeviceId(), []);
+  const [loading, setLoading] = useState(false);
 
-  // Thêm 2 state mới để quản lý check-in logic
+  // Quản lý check-in logic
   const [checkedIn, setCheckedIn] = useState(false);
   const [preCorrect, setPreCorrect] = useState(0);
+  const [checkinLink, setCheckinLink] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -36,11 +38,13 @@ export default function App() {
     })();
   }, [deviceId]);
 
-  async function start({ checkedIn, preCorrect }) {
+  async function start({ checkedIn, preCorrect, link }) {
+    setLoading(true);
     setCheckedIn(checkedIn);
     setPreCorrect(preCorrect);
+    setCheckinLink(link || "");
 
-    const s = await api.start(deviceId);
+    const s = await api.start(deviceId, link); // ✅ gửi luôn link
     if (s.alreadyPlayed) {
       setResult(s.result);
       setStage("result");
@@ -51,16 +55,24 @@ export default function App() {
     const q = await api.questions(deviceId);
     let quizData = q.quiz;
 
-    // ✅ Nếu đã check-in → chỉ chơi câu thứ 3 (giả sử tổng 3 câu)
-    // và coi như đã đúng 2 câu đầu tiên
+    // Nếu đã check-in → chỉ chơi câu cuối cùng, coi như đã đúng preCorrect câu trước
     if (checkedIn) {
-      quizData = quizData.slice(2, 3);
+      quizData = quizData.slice(-1);
     }
 
     setQuiz(quizData);
     setStage("quiz");
+    setLoading(false);
   }
-
+  if (loading) {
+    return (
+      <div className="main-wrapper">
+        <div className="loading-screen">
+          <p>Đang tải, vui lòng đợi...</p>
+        </div>
+      </div>
+    );
+  }
   async function finish(score) {
     const totalScore = checkedIn ? preCorrect + score : score;
 
@@ -69,7 +81,7 @@ export default function App() {
       reward = score === 1 ? "GIFT_LARGE" : "GIFT_SMALL";
     }
 
-    const r = await api.finish(deviceId, totalScore, reward);
+    const r = await api.finish(deviceId, totalScore, reward, checkinLink); // ✅ gửi link cùng finish
 
     setResult(r);
     localStorage.setItem("played", "true");
@@ -80,16 +92,34 @@ export default function App() {
     window.location.replace(window.location.href);
   }
 
-  if (stage === "welcome") return <Welcome onStart={start} />;
+  if (stage === "welcome")
+    return (
+      <div className="main-wrapper">
+        <Welcome onStart={start} deviceId={deviceId} />
+      </div>
+    );
+
   if (stage === "quiz")
-    return <Quiz quiz={quiz} endTimeISO={endTime} onFinish={finish} />;
+    return (
+      <div className="main-wrapper">
+        <Quiz
+          quiz={quiz}
+          endTimeISO={endTime}
+          onFinish={finish}
+          preCorrect={checkedIn ? preCorrect : 0}
+        />
+      </div>
+    );
+
   if (stage === "result")
     return (
-      <Result
-        score={result?.score || 0}
-        reward={result?.reward || "NO_GIFT"}
-        onAcknowledge={acknowledge}
-      />
+      <div className="main-wrapper">
+        <Result
+          score={result?.score || 0}
+          reward={result?.reward || "NO_GIFT"}
+          onAcknowledge={acknowledge}
+        />
+      </div>
     );
 
   return null;

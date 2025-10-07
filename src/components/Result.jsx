@@ -2,20 +2,29 @@ import "../cosmic-theme.css";
 
 const gifts = {
   GIFT_LARGE:
-    "https://images.unsplash.com/photo-1604014237800-1c9102c1d3fd?q=80&w=600",
+    "https://heydaybozeman.com/cdn/shop/files/10-gift-wrapping-367153.png?v=1750196994",
   GIFT_MEDIUM:
     "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=600",
   GIFT_SMALL:
     "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600",
   NO_GIFT:
-    "https://images.unsplash.com/photo-1520975922203-bff9a0952c34?q=80&w=600",
+    "https://www.shutterstock.com/shutterstock/photos/1516329536/display_1500/stock-photo-photo-of-young-african-woman-hand-with-no-text-1516329536.jpg",
 };
 
 export default function Result({ score, reward, onAcknowledge }) {
   const img = gifts[reward] || gifts.NO_GIFT;
 
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "16px",
+      }}
+    >
       {/* 🌠 Nền vũ trụ */}
       <div className="cosmic-bg">
         {[...Array(80)].map((_, i) => (
@@ -31,30 +40,22 @@ export default function Result({ score, reward, onAcknowledge }) {
         ))}
       </div>
 
-      <div className="cosmic-card center glass" style={{ textAlign: "center" }}>
-        <img
-          src={img}
-          alt="reward"
-          className="reward-img"
-          style={{
-            width: "220px",
-            height: "220px",
-            borderRadius: "16px",
-            boxShadow: "0 0 20px ",
-            marginBottom: "16px",
-          }}
-        />
+      <h2 style={{ fontFamily: "Goldman", margin: "8px 2px" }}>
+        Kết quả của bạn
+      </h2>
 
-        <h2 style={{ fontFamily: "Goldman", margin: "8px 0" }}>
-          Kết quả của bạn: {score}/3
-        </h2>
-
-        <p
-          style={{ fontFamily: "Goldman", opacity: 0.85, marginBottom: "2px" }}
-        >
-          Phần quà: {String(reward || "NO_GIFT").replace("_", " ")}
-        </p>
-      </div>
+      <img
+        src={img}
+        alt="reward"
+        style={{
+          width: "80%",
+          maxWidth: "600px",
+          height: "auto",
+          borderRadius: "16px",
+          boxShadow: "0 0 20px rgba(255,255,255,0.3)",
+          marginBottom: "16px",
+        }}
+      />
     </div>
   );
 }

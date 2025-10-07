@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import ProgressBar from "./ProgressBar";
 import AnswerOption from "./AnswerOption";
-import "../cosmic-theme.css"; // đảm bảo có cosmic-bg, cosmic-star, cosmic-btn, glass
+import "../cosmic-theme.css";
 
-export default function Quiz({ quiz, endTimeISO, onFinish }) {
+export default function Quiz({ quiz, onFinish, preCorrect = 0 }) {
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
-  const [states, setStates] = useState(["", "", ""]);
+  const [states, setStates] = useState([]);
   const [lock, setLock] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(30); // 30s mỗi câu
   const finished = useRef(false);
 
   const parsedQuiz = quiz.map((q) => {
@@ -20,82 +21,65 @@ export default function Quiz({ quiz, endTimeISO, onFinish }) {
     return q;
   });
 
-  function useCountdown(endTimeISO, onExpire) {
-    const [left, setLeft] = useState(0);
-    const cb = useRef(onExpire);
-    cb.current = onExpire;
-    useEffect(() => {
-      if (!endTimeISO) return;
-      const end = new Date(endTimeISO).getTime();
-      const tick = () => {
-        const now = Date.now();
-        const remain = Math.max(0, Math.ceil((end - now) / 1000));
-        setLeft(remain);
-        if (remain <= 0) cb.current && cb.current();
-      };
-      tick();
-      const id = setInterval(tick, 250);
-      return () => clearInterval(id);
-    }, [endTimeISO]);
-    return left;
-  }
-
-  const leftSec = useCountdown(endTimeISO, () => {
-    if (!finished.current) handleFinish();
-  });
-
+  // Khởi tạo states cho câu đầu
   useEffect(() => {
-    function blockBack() {
-      window.history.pushState(null, "", window.location.href);
-    }
-    blockBack();
-    const pop = () => window.history.go(1);
-    window.onpopstate = pop;
-    return () => {
-      window.onpopstate = null;
-    };
+    setStates(Array(parsedQuiz[0]?.options.length || 3).fill(""));
   }, []);
 
+  // Timer 30s mỗi câu
   useEffect(() => {
-    const handler = () => {
-      if (document.hidden && idx < parsedQuiz.length && !lock) {
-        setLock(true);
-        const correct = parsedQuiz[idx].correct;
-        setStates((s) => s.map((_, i) => (i === correct ? "correct" : s[i])));
-        setTimeout(() => {
-          setIdx((i) => i + 1);
-          setStates(Array(parsedQuiz[idx + 1]?.options.length || 3).fill(""));
-          setLock(false);
-        }, 500);
-      }
-    };
-    document.addEventListener("visibilitychange", handler);
-    return () => document.removeEventListener("visibilitychange", handler);
-  }, [idx, parsedQuiz, lock]);
+    if (lock) return;
+    setTimeLeft(30); // reset khi câu mới
+    const timer = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          handleNextQuestion(false); // hết thời gian
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [idx, lock]);
 
-  const handleAnswer = (i) => {
+  const handleNextQuestion = (answeredCorrectly = false, answerIdx = null) => {
     if (lock) return;
     setLock(true);
+
+    // hiện đáp án đúng
     const correct = parsedQuiz[idx].correct;
-    const ok = i === correct;
     setStates((s) =>
-      s.map((_, k) =>
-        k === i ? (ok ? "correct" : "wrong") : k === correct ? "correct" : ""
+      s.map((_, i) =>
+        i === correct
+          ? "correct"
+          : answerIdx === i
+          ? answeredCorrectly
+            ? "correct"
+            : "wrong"
+          : ""
       )
     );
-    if (ok) {
-      setScore((v) => v + 1);
+
+    if (answeredCorrectly) {
+      setScore((s) => s + 1);
       confetti({ particleCount: 80, spread: 65, origin: { y: 0.6 } });
     }
+
     setTimeout(() => {
       if (idx + 1 < parsedQuiz.length) {
         setIdx(idx + 1);
         setStates(Array(parsedQuiz[idx + 1].options.length).fill(""));
         setLock(false);
       } else {
-        handleFinish(ok ? score + 1 : score);
+        handleFinish(answeredCorrectly ? score + 1 : score);
       }
-    }, 3000);
+    }, 500); // delay giữa các câu 0.5s
+  };
+
+  const handleAnswer = (i) => {
+    if (lock) return;
+    const correct = parsedQuiz[idx].correct;
+    handleNextQuestion(i === correct, i);
   };
 
   const handleFinish = (finalScore = score) => {
@@ -125,25 +109,23 @@ export default function Quiz({ quiz, endTimeISO, onFinish }) {
       </div>
 
       <div className="cosmic-card center glass">
-        <div
-          className="timer"
-          style={{ fontFamily: "Goldman", fontSize: "1.25rem" }}
-        >
-          ⏱️ {leftSec}s
+        {/* Timer */}
+        <div style={{ fontFamily: "Goldman", fontSize: "1.25rem" }}>
+          ⏱️ {timeLeft}s
         </div>
 
-        <ProgressBar passed={score} />
+        {/* Progress */}
+        <ProgressBar
+          passed={preCorrect + score}
+          total={preCorrect + quiz.length}
+        />
 
         <h2 style={{ fontFamily: "Goldman", margin: "12px 0" }}>
           Câu {idx + 1}/{parsedQuiz.length}
         </h2>
 
         <p
-          style={{
-            opacity: 0.85,
-            fontFamily: "Goldman",
-            marginBottom: "16px",
-          }}
+          style={{ opacity: 0.85, fontFamily: "Goldman", marginBottom: "16px" }}
         >
           {q.q}
         </p>
