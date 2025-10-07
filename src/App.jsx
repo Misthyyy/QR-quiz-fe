@@ -51,6 +51,17 @@ export default function App() {
       return;
     }
 
+    if (preCorrect === 3) {
+      const totalScore = preCorrect;
+      const reward = "GIFT_LARGE";
+
+      const r = await api.finish(deviceId, totalScore, reward, link);
+      setResult(r);
+      setStage("result");
+      setLoading(false);
+      return;
+    }
+
     setEndTime(s.endTime);
     const q = await api.questions(deviceId);
     let quizData = q.quiz;
@@ -68,7 +79,11 @@ export default function App() {
     return (
       <div className="main-wrapper">
         <div className="loading-screen">
-          <p>Đang tải, vui lòng đợi...</p>
+          <p
+            style={{ fontFamily: "'Goldman', sans-serif", fontSize: "1.5rem" }}
+          >
+            Đang tải, đợi xí nghen...
+          </p>
         </div>
       </div>
     );

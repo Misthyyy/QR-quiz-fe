@@ -129,8 +129,8 @@ body {
   inset: 0;
   background: rgba(10, 0, 20, 0.6);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều ngang */
   z-index: 1000;
   backdrop-filter: blur(6px);
   animation: fadeInModal 0.3s ease;
@@ -149,19 +149,22 @@ body {
   width: 80%;
   max-width: 420px;
   color: #fff;
-  text-align: center;
   font-family: "Orbitron", sans-serif;
   animation: scaleIn 0.3s ease;
 
+  /* 🔧 Căn giữa mọi thứ */
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center; /* Thêm dòng này để căn giữa theo chiều dọc */
+  text-align: center;
 }
+
 .cosmic-modal-content input {
   display: block;
-  width: 100%;
-  max-width: 320px; /* Giới hạn độ rộng để không tràn */
-  margin: 12px auto 8px;
+  width: 80%;
+  max-width: 250px; /* Giới hạn độ rộng để không tràn */
+  margin: 12px auto 4%;
   padding: 10px;
   border-radius: 8px;
   border: none;
@@ -205,5 +208,72 @@ body {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* 🌠 Toast modal overlay (nền mờ + căn giữa) */
+.cosmic-toast-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 20, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeInToast 0.3s ease forwards;
+}
+
+/* 🌌 Toast content */
+.cosmic-toast {
+  background: radial-gradient(
+    circle at top,
+    rgba(40, 40, 80, 0.9),
+    rgba(10, 10, 30, 0.9)
+  );
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px 32px;
+  font-family: "Goldman", sans-serif;
+  font-size: 1.1rem;
+  box-shadow: 0 0 20px rgba(160, 200, 255, 0.4);
+  text-align: center;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+  animation: scaleInToast 0.4s ease;
+}
+
+/* ✨ Animations */
+@keyframes fadeInToast {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes scaleInToast {
+  from {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ✨ Fade out animation for disappearing toast */
+.fade-out {
+  animation: fadeOutToast 0.4s ease forwards;
+}
+
+@keyframes fadeOutToast {
+  to {
+    opacity: 0;
+    transform: scale(0.9);
   }
 }

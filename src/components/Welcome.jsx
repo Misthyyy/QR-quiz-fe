@@ -48,15 +48,18 @@ export default function Welcome({ onStart, deviceId }) {
       if (phones.includes(normalized)) {
         showToast("Xác thực thành công!");
         setShowPhoneModal(false);
-        onStart({ checkedIn: true, preCorrect: 3, isDonor: true });
+        onStart({ checkedIn: false, preCorrect: 3 });
       } else {
         showToast("Số điện thoại không khớp danh sách donor!");
       }
     } catch (err) {
       console.error(err);
+      setLoading(false);
+      setShowPhoneModal(false);
       showToast("Lỗi khi kiểm tra donor!");
     } finally {
       setLoading(false);
+      setShowPhoneModal(false);
     }
   };
 
@@ -135,6 +138,7 @@ export default function Welcome({ onStart, deviceId }) {
               boxShadow: "0 0 12px rgba(185, 148, 255, 0.37)",
               textShadow: "0 0 6px rgba(21, 8, 56, 0.81)",
               transition: "all 0.3s ease",
+              fontSize: "1.2rem",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background =
@@ -166,6 +170,7 @@ export default function Welcome({ onStart, deviceId }) {
               boxShadow: "0 0 12px rgba(144, 224, 239, 0.3)",
               textShadow: "0 0 6px rgba(11, 68, 63, 0.8)",
               transition: "all 0.3s ease",
+              fontSize: "1.2rem",
             }}
             onClick={() => setShowLinkModal(true)}
           >
@@ -189,6 +194,7 @@ export default function Welcome({ onStart, deviceId }) {
               boxShadow: "0 0 12px rgba(190, 37, 60, 0.3)",
               textShadow: "0 0 6px rgba(214, 17, 17, 0.85)",
               transition: "all 0.3s ease",
+              fontSize: "1.2rem",
             }}
             onClick={() => onStart({ checkedIn: false, preCorrect: 0 })}
           >
@@ -196,7 +202,7 @@ export default function Welcome({ onStart, deviceId }) {
           </button>
         </div>
 
-        <p style={{ marginTop: "20px", opacity: 0.7, fontSize: "1rem" }}>
+        <p style={{ marginTop: "20px", opacity: 0.7, fontSize: "1.5rem" }}>
           Bạn chỉ có <strong>1 lượt chơi!</strong>
         </p>
       </div>
@@ -215,7 +221,6 @@ export default function Welcome({ onStart, deviceId }) {
               placeholder="Nhập số điện thoại..."
               style={{
                 marginTop: "12px",
-                padding: "10px",
                 borderRadius: "8px",
                 width: "100%",
                 border: "none",
@@ -229,11 +234,12 @@ export default function Welcome({ onStart, deviceId }) {
               <p
                 style={{
                   color: /^[0-9]{9,12}$/.test(phone) ? "limegreen" : "tomato",
+                  fontFamily: "'Goldman', sans-serif",
                 }}
               >
                 {/^[0-9]{9,12}$/.test(phone)
-                  ? "Số điện thoại hợp lệ ✅"
-                  : "Số điện thoại chưa hợp lệ ❌"}
+                  ? "✅ Số điện thoại hợp lệ ✅"
+                  : "❌ Số điện thoại chưa hợp lệ ❌"}
               </p>
             )}
 
@@ -383,7 +389,11 @@ export default function Welcome({ onStart, deviceId }) {
       )}
 
       {/* 🌟 Toast */}
-      {toast && <div className="cosmic-toast">{toast}</div>}
+      {toast && (
+        <div className="cosmic-toast-overlay">
+          <div className="cosmic-toast">{toast}</div>
+        </div>
+      )}
     </div>
   );
 }
