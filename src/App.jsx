@@ -44,19 +44,19 @@ export default function App() {
     setPreCorrect(preCorrect);
     setCheckinLink(link || "");
 
-    const s = await api.start(deviceId, link); // ✅ gửi luôn link
+    const s = await api.start(deviceId, link);
+
     if (s.alreadyPlayed) {
       setResult(s.result);
       setStage("result");
       return;
     }
 
+    // ✅ Donor xác thực thành công => bỏ qua quiz, cho 3 điểm
     if (preCorrect === 3) {
-      const totalScore = preCorrect;
-      const reward = "GIFT_LARGE";
-
-      const r = await api.finish(deviceId, totalScore, reward, link);
-      setResult(r);
+      const totalScore = 3;
+      const r = await api.finish(deviceId, totalScore, "GIFT_LARGE", link);
+      setResult({ score: totalScore, reward: "GIFT_LARGE" });
       setStage("result");
       setLoading(false);
       return;
@@ -66,7 +66,7 @@ export default function App() {
     const q = await api.questions(deviceId);
     let quizData = q.quiz;
 
-    // Nếu đã check-in → chỉ chơi câu cuối cùng, coi như đã đúng preCorrect câu trước
+    // ✅ Nếu đã check-in -> chỉ 1 câu hỏi
     if (checkedIn) {
       quizData = quizData.slice(-1);
     }
@@ -75,6 +75,7 @@ export default function App() {
     setStage("quiz");
     setLoading(false);
   }
+
   if (loading) {
     return (
       <div className="main-wrapper">
@@ -89,16 +90,19 @@ export default function App() {
     );
   }
   async function finish(score) {
-    const totalScore = checkedIn ? preCorrect + score : score;
+    let totalScore;
 
-    let reward = "NO_GIFT";
     if (checkedIn) {
-      reward = score === 1 ? "GIFT_LARGE" : "GIFT_SMALL";
+      // ✅ Chỉ 1 câu: đúng => 3, sai => 2
+      totalScore = score === 1 ? 3 : 2;
+    } else {
+      // ✅ Trường hợp chưa check-in: tổng số câu đúng
+      totalScore = score;
     }
 
-    const r = await api.finish(deviceId, totalScore, reward, checkinLink); // ✅ gửi link cùng finish
+    const r = await api.finish(deviceId, totalScore, "NO_GIFT", checkinLink);
 
-    setResult(r);
+    setResult({ score: totalScore });
     localStorage.setItem("played", "true");
     setStage("result");
   }
@@ -132,6 +136,7 @@ export default function App() {
         <Result
           score={result?.score || 0}
           reward={result?.reward || "NO_GIFT"}
+          deviceId={deviceId}
           onAcknowledge={acknowledge}
         />
       </div>
