@@ -31,31 +31,33 @@ export default function Welcome({ onStart, deviceId }) {
   // 🟢 Hàm kiểm tra donor
   const handleDonorCheck = async () => {
     if (!phone.trim()) {
-      showToast("Vui lòng nhập số điện thoại");
+      showToast("Vui lòng nhập 4 số cuối");
       return;
     }
+
     setLoading(true);
     try {
       const donors = await api.donors();
 
+      // Mỗi phần tử donors đã là 4 số (vd: "1234")
       const phones = donors.map((d) =>
         typeof d === "string"
-          ? d.replace(/\D/g, "")
-          : d.phone.replace(/\D/g, "")
+          ? d.replace(/\D/g, "") // loại bỏ ký tự không phải số, phòng trường hợp có khoảng trắng
+          : (d.phone || "").replace(/\D/g, "")
       );
 
       const normalized = phone.replace(/\D/g, "");
+
       if (phones.includes(normalized)) {
         showToast("Xác thực thành công!");
         setShowPhoneModal(false);
         onStart({ checkedIn: false, preCorrect: 3 });
       } else {
         showToast("Số điện thoại không khớp danh sách donor!");
+        await new Promise((r) => setTimeout(r, 2000));
       }
     } catch (err) {
       console.error(err);
-      setLoading(false);
-      setShowPhoneModal(false);
       showToast("Lỗi khi kiểm tra donor!");
     } finally {
       setLoading(false);
@@ -211,14 +213,15 @@ export default function Welcome({ onStart, deviceId }) {
       {showPhoneModal && (
         <div className="cosmic-modal">
           <div className="cosmic-modal-content">
-            <h3>Xin số điện thoại xác minh nhe</h3>
+            <h3>Cho mình xin 4 số cuối số điện thoại nhe</h3>
             <input
               type="text"
               value={phone}
-              onChange={(e) =>
-                /^[0-9+]*$/.test(e.target.value) && setPhone(e.target.value)
-              }
-              placeholder="Nhập số điện thoại..."
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ""); // chỉ cho phép số
+                if (value.length <= 4) setPhone(value); // giới hạn 4 ký tự
+              }}
+              placeholder="Nhập 4 số cuối..."
               style={{
                 marginTop: "12px",
                 borderRadius: "8px",
@@ -230,18 +233,6 @@ export default function Welcome({ onStart, deviceId }) {
                 fontFamily: "'Goldman', sans-serif",
               }}
             />
-            {phone && (
-              <p
-                style={{
-                  color: /^[0-9]{9,12}$/.test(phone) ? "limegreen" : "tomato",
-                  fontFamily: "'Goldman', sans-serif",
-                }}
-              >
-                {/^[0-9]{9,12}$/.test(phone)
-                  ? "✅ Số điện thoại hợp lệ ✅"
-                  : "❌ Số điện thoại chưa hợp lệ ❌"}
-              </p>
-            )}
 
             <div
               style={{
@@ -253,7 +244,7 @@ export default function Welcome({ onStart, deviceId }) {
             >
               <button
                 className="cosmic-btn"
-                disabled={!/^[0-9]{9,12}$/.test(phone) || loading}
+                disabled={phone.length !== 4 || loading}
                 onClick={handleDonorCheck}
                 style={{
                   fontFamily: "'Goldman', sans-serif",
@@ -267,15 +258,14 @@ export default function Welcome({ onStart, deviceId }) {
                   borderRadius: "12px",
                   boxShadow: "0 0 10px rgba(144, 224, 239, 0.3)",
                   textShadow: "0 0 6px rgba(255,255,255,0.5)",
-                  cursor: /^[0-9]{9,12}$/.test(phone)
-                    ? "pointer"
-                    : "not-allowed",
-                  opacity: /^[0-9]{9,12}$/.test(phone) ? 1 : 0.7,
+                  cursor: phone.length === 4 ? "pointer" : "not-allowed",
+                  opacity: phone.length === 4 ? 1 : 0.7,
                   transition: "all 0.3s ease",
                 }}
               >
                 {loading ? "Đang kiểm tra..." : "Xác nhận"}
               </button>
+
               <button
                 className="cosmic-btn"
                 style={{
