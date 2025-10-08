@@ -1,18 +1,33 @@
+import { useState, useEffect } from "react";
+import { api } from "../api";
 import "../cosmic-theme.css";
 
-const gifts = {
-  GIFT_LARGE:
-    "https://heydaybozeman.com/cdn/shop/files/10-gift-wrapping-367153.png?v=1750196994",
-  GIFT_MEDIUM:
-    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=600",
-  GIFT_SMALL:
-    "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600",
-  NO_GIFT:
-    "https://www.shutterstock.com/shutterstock/photos/1516329536/display_1500/stock-photo-photo-of-young-african-woman-hand-with-no-text-1516329536.jpg",
-};
+export default function Result({ score, reward, onAcknowledge, deviceId }) {
+  const [received, setReceived] = useState(false);
 
-export default function Result({ score, reward, onAcknowledge }) {
-  const img = gifts[reward] || gifts.NO_GIFT;
+  // 🟢 Khi component load, kiểm tra field receive_at từ backend
+  useEffect(() => {
+    const fetchResult = async () => {
+      try {
+        const res = await api.result(deviceId);
+        if (res?.received_at) {
+          setReceived(true);
+        }
+      } catch (err) {
+        console.error("Lỗi khi kiểm tra trạng thái nhận quà:", err);
+      }
+    };
+    fetchResult();
+  }, [deviceId]);
+
+  const handleReceive = async () => {
+    try {
+      await api.receiveGift(deviceId);
+      setReceived(true);
+    } catch (err) {
+      console.error("Lỗi khi gửi trạng thái nhận quà:", err);
+    }
+  };
 
   return (
     <div
@@ -25,7 +40,6 @@ export default function Result({ score, reward, onAcknowledge }) {
         padding: "16px",
       }}
     >
-      {/* 🌠 Nền vũ trụ */}
       <div className="cosmic-bg">
         {[...Array(80)].map((_, i) => (
           <div
@@ -40,22 +54,74 @@ export default function Result({ score, reward, onAcknowledge }) {
         ))}
       </div>
 
-      <h2 style={{ fontFamily: "Goldman", margin: "8px 2px" }}>
+      <h1 style={{ fontFamily: "Goldman", margin: "8px 1px" }}>
         Kết quả của bạn
-      </h2>
+      </h1>
+      <>
+        <div
+          style={{
+            fontSize: "20rem",
+            fontFamily: "'Goldman', sans-serif",
+            marginBottom: "8px",
+            fontWeight: "bold",
+            color: "white",
+            textShadow: "0 0 8px #0ff, 0 0 16px #0066ff, 0 0 32px #001a33",
+            animation: "scorePulse 0.5s infinite alternate",
+          }}
+        >
+          {score}
+        </div>
 
-      <img
-        src={img}
-        alt="reward"
-        style={{
-          width: "80%",
-          maxWidth: "600px",
-          height: "auto",
-          borderRadius: "16px",
-          boxShadow: "0 0 20px rgba(255,255,255,0.3)",
-          marginBottom: "16px",
-        }}
-      />
+        <style>
+          {`
+        @keyframes scorePulse {
+          from {
+            text-shadow: 0 0 8px rgba(3, 85, 85, 1), 0 0 16px #0066ff, 0 0 32px #001a33;
+          }
+          to {
+            text-shadow: 0 0 12px #09576bff, 0 0 28px #00ffff, 0 0 48px #003366;
+          }
+        }
+
+        @keyframes glowPulse {
+          from { text-shadow: 0 0 6px #00ff99, 0 0 12px #00ffcc, 0 0 20px #007755; }
+          to { text-shadow: 0 0 10px #00ffaa, 0 0 24px #00ffff, 0 0 40px #009977; }
+        }
+      `}
+        </style>
+      </>
+
+      {received ? (
+        <p
+          style={{
+            fontFamily: "'Goldman', sans-serif",
+            fontSize: "2rem",
+            fontWeight: "bold",
+            marginTop: "8px",
+            textShadow: "0 0 6px #032b1bff, 0 0 12px #00ffcc",
+          }}
+        >
+          ĐÃ NHẬN QUÀ
+        </p>
+      ) : (
+        <button
+          onClick={handleReceive}
+          style={{
+            marginTop: "20px",
+            fontFamily: "'Goldman', sans-serif",
+            padding: "10px 20px",
+            borderRadius: "12px",
+            border: "1px solid rgba(255,255,255,0.3)",
+            background:
+              "linear-gradient(90deg, rgba(84,155,168,0.7), rgba(32,246,221,0.7))",
+            color: "#fff",
+            cursor: "pointer",
+            fontSize: "1.5rem",
+          }}
+        >
+          Đã nhận
+        </button>
+      )}
     </div>
   );
 }
