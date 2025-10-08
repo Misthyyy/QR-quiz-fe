@@ -91,7 +91,7 @@ export default function Result({ score, reward, onAcknowledge, deviceId }) {
         </style>
       </>
 
-      {received ? (
+      /* {received ? (
         <p
           style={{
             fontFamily: "'Goldman', sans-serif",
@@ -121,7 +121,7 @@ export default function Result({ score, reward, onAcknowledge, deviceId }) {
         >
           Đã nhận
         </button>
-      )}
+      )} */
     </div>
   );
 }
