@@ -55,7 +55,7 @@ export default function Result({ score, reward, onAcknowledge, deviceId }) {
       </div>
 
       <h1 style={{ fontFamily: "Goldman", margin: "8px 1px" }}>
-        Kết quả của bạn
+        SỐ CÂU ĐÚNG
       </h1>
       <>
         <div
