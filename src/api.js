@@ -36,4 +36,8 @@ export const api = {
     });
     return await r.json();
   },
+  receiveGift: (deviceId) =>
+    fetch(`${API}/api/receive/${deviceId}`, {
+      method: "POST",
+    }).then((res) => res.json()),
 };
